@@ -12,6 +12,8 @@ class TicTacToe {
     String[] gameBoard; // Representation of Tic-Tac-Toe board
     int emptySpaces;    // Count of spaces left to be played; initialized to 9
     boolean run;        // Used to enable replay ability
+    int score;          // Holds score of the game, treating the "0" player as the maximizer 
+    AI ai;              // Artificial intelligence bot
 
     static final int width = 3;
     static final String ANSI_RED = "\u001B[31m";
@@ -42,6 +44,12 @@ class TicTacToe {
                 if (!winner.isBlank()) {
                     break;
                 }
+                aiMove();
+                printGame();
+                winner();
+                if (!winner.isBlank()) {
+                    break;
+                }
             }
             endGame();
         }
@@ -59,7 +67,6 @@ class TicTacToe {
         verticalWinner(verticalStarts);
         diagonalWinner();
 
-        // If no winner, check draw
         if (winner.isBlank() && emptySpaces == 0) {
             winner = "draw";
             run = false;
@@ -78,6 +85,9 @@ class TicTacToe {
         }
     }
 
+    /**
+     * Checks if there is a horizontal win.
+     */
     private void horizontalWinner(int[] starts) {
         for (int start : starts) {
             if (gameBoard[start].equals(gameBoard[start + 1]) && gameBoard[start].equals(gameBoard[start + 2])) {
@@ -87,6 +97,9 @@ class TicTacToe {
         }
     }
 
+    /**
+     * Checks if there is a diagonal win.
+     */
     private void diagonalWinner() {
         if (gameBoard[0].equals(gameBoard[4]) && gameBoard[0].equals(gameBoard[8])) {
             winner = gameBoard[0];
@@ -105,7 +118,6 @@ class TicTacToe {
     private void move() {
         int userSelection = 0;
 
-        // Get valid move
         while (userSelection == 0) {
             try {
                 System.out.print("Where do you want to place an " + player + "? ");
@@ -127,9 +139,9 @@ class TicTacToe {
             }
         }
 
-        // Update game state
         gameBoard[userSelection - 1] = player;
         emptySpaces--;
+        computeScore();
         changePlayer();
     }
 
@@ -145,6 +157,139 @@ class TicTacToe {
      */
     private boolean moveAlreadyMade(int userSelection) {
         return gameBoard[userSelection - 1].matches("X|O");
+    }
+
+    private void aiMove() {
+        ai = new AI(gameBoard, score, player, emptySpaces);
+        int aiSelection = ai.computeBestMove();
+
+        gameBoard[aiSelection] = player;
+        emptySpaces--;
+        computeScore();
+        changePlayer();
+    }
+
+    /**
+     * Computes score of game.
+     * Points are positive for the "0" player, and negative for the "X" player.
+     */
+    private void computeScore() {
+        int[] horizontalStarts = {0, 3, 6};
+        int[] verticalStarts = {0, 1, 2};
+
+        score = 0;
+        horizontalScore(horizontalStarts);
+        verticalScore(verticalStarts);
+        diagonalScore();
+    }
+
+    /**
+     * Updates score with vertical values.
+     */
+    private void verticalScore(int[] starts) {
+        for (int start : starts) {
+            int skew = 0;
+            if (gameBoard[start].equals("X")) {
+                skew -= 1;
+            } else if (gameBoard[start].equals("0")) {
+                skew += 1;
+            } 
+            
+            if (gameBoard[start + 3].equals("X")) {
+                skew -= 1;
+            } else if (gameBoard[start + 3].equals("0")) {
+                skew += 1;
+            }
+
+            if (gameBoard[start + 6].equals("X")) {
+                skew -= 1;
+            } else if (gameBoard[start + 6].equals("0")) {
+                skew += 1;
+            }
+            int unsignedScore = (int) Math.pow(10, Math.abs(skew));
+            int signedScore = skew > 0 ? unsignedScore : -unsignedScore;
+            score += signedScore;
+        }
+    }
+
+    /**
+     * Updates score with horizontal values.
+     */
+    private void horizontalScore(int[] starts) {
+        for (int start : starts) {
+            int skew = 0;
+            if (gameBoard[start].equals("X")) {
+                skew -= 1;
+            } else if (gameBoard[start].equals("0")) {
+                skew += 1;
+            } 
+            
+            if (gameBoard[start + 1].equals("X")) {
+                skew -= 1;
+            } else if (gameBoard[start + 1].equals("0")) {
+                skew += 1;
+            }
+
+            if (gameBoard[start + 2].equals("X")) {
+                skew -= 1;
+            } else if (gameBoard[start + 2].equals("0")) {
+                skew += 1;
+            }
+            int unsignedScore = (int) Math.pow(10, Math.abs(skew));
+            int signedScore = skew > 0 ? unsignedScore : -unsignedScore;
+            score += signedScore;
+        }  
+    }
+
+    /**
+     * Updates score with diagonal values.
+     */
+    private void diagonalScore() {
+        int skew = 0;
+        if (gameBoard[0].equals("X")) {
+            skew -= 1;
+        } else if (gameBoard[0].equals("0")) {
+            skew += 1;
+        } 
+        
+        if (gameBoard[4].equals("X")) {
+            skew -= 1;
+        } else if (gameBoard[4].equals("0")) {
+            skew += 1;
+        }
+
+        if (gameBoard[8].equals("X")) {
+            skew -= 1;
+        } else if (gameBoard[8].equals("0")) {
+            skew += 1;
+        }
+
+        int unsignedScore = (int) Math.pow(10, Math.abs(skew));
+        int signedScore = skew > 0 ? unsignedScore : -unsignedScore;
+        score += signedScore;
+
+        skew = 0;
+        if (gameBoard[2].equals("X")) {
+            skew -= 1;
+        } else if (gameBoard[2].equals("0")) {
+            skew += 1;
+        } 
+        
+        if (gameBoard[4].equals("X")) {
+            skew -= 1;
+        } else if (gameBoard[4].equals("0")) {
+            skew += 1;
+        }
+
+        if (gameBoard[6].equals("X")) {
+            skew -= 1;
+        } else if (gameBoard[6].equals("0")) {
+            skew += 1;
+        }
+        
+        unsignedScore = (int) Math.pow(10, Math.abs(skew));
+        signedScore = skew > 0 ? unsignedScore : -unsignedScore;
+        score += signedScore;
     }
 
     /**
@@ -197,6 +342,7 @@ class TicTacToe {
         player = "X";
         emptySpaces = 9;
         winner = "";
+        score = 0;
     }
 
     /**
