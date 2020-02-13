@@ -9,49 +9,94 @@ class AI {
     }
 
     /**
-     * TODO - Exposed method; builds tree, runs minimax, and returns optimal move.
-     * 
-     * This method should call buildTree on the root node, then run minimax on the root.
-     * Then, it should find which child node resulted in the minimax optimal value, and return
-     * the move that child represents.
+     * Exposed method; builds tree, runs minimax, and returns optimal move.
      */
     int computeBestMove() {
         System.out.println("Nice move, now it's my turn!");
+        buildTree(root);
+
+        int bestValue = minimax(root);
+        for (Simulator child : root.children) {
+            if (child.value == bestValue) {
+                return child.position;
+            }
+        }
         return -1;
     }
 
     /**
-     * TODO - Runs minimax algorithm on root node, returns best position.
-     * 
-     * This method should be identical to the one in Stepik, except that we're
-     * using an ArrayList of children. We should update Stepik to match this design.
+     * Runs minimax algorithm on root node, returns best position.
      */
     private int minimax(Simulator node) {
-        return -1;
+        if (isTerminal(node)) {
+            return payoff(node);
+
+        } else if (isMaxPlayer(node)) {
+            return processMaxPlayer(node);
+
+        } else if (isMinPlayer(node)) {
+            return processMinPlayer(node);
+
+        } else {
+            System.err.println("MINIMAX FAILED - node type invalid");
+            System.exit(1);
+            return -1;
+        }
     }
 
     /**
-     * TODO - Builds the game tree from the given node.
-     * 
-     * This is a recursive method with the following structure:
-     * Base case: If the node is terminal, return
-     * Recursive: 
-     *  Get all possible moves for this node
-     *  For every possible move
-     *      Create a Simulator child node that is a copy of the current state
-     *      Perform the move on the child
-     *      Add child to node's children ArrayList
-     *      buildTree(child)
+     * Contains core logic for Max player.
+     */
+    private int processMaxPlayer(Simulator node) {
+        int value = Integer.MIN_VALUE;
+            ArrayList<Simulator> children = node.children;
+            for (int i = 0; i < children.size(); i++) {
+                children.get(i).value = minimax(children.get(i));
+                if (value < children.get(i).value) {
+                    value = children.get(i).value;
+                }
+            }
+        return value;
+    }
+
+    /**
+     * Contains core logic for Min player.
+     */
+    private int processMinPlayer(Simulator node) {
+        int value = Integer.MAX_VALUE;
+            ArrayList<Simulator> children = node.children;
+            for (int i = 0; i < children.size(); i++) {
+                children.get(i).value  = minimax(children.get(i));
+                if (value > children.get(i).value ) {
+                    value = children.get(i).value ;
+                }
+            }
+        return value;
+    }
+
+
+    /**
+     * Builds the game tree from the given node.
      */
     private void buildTree(Simulator node) {
-        return;
+        if (isTerminal(node)) {
+            return;
+        }
+
+        ArrayList<Integer> possibleMoves = node.getPossibleMoves();
+        for (int possibleMove : possibleMoves) {
+            Simulator newChild = new Simulator(node, changeType(node.type), possibleMove);
+            newChild.makeMove(possibleMove);
+            node.children.add(newChild);
+            buildTree(newChild);
+        }
     }
 
     /**
-     * TODO - Changes type from Max player to Min player or vice versa.
+     * Changes type from Max player to Min player or vice versa.
      */
     private String changeType(String type) {
-        return "";
+        return type.equals("Max") ? "Min" : "Max";
     }
 
     /**
@@ -96,7 +141,6 @@ class Simulator {
     ArrayList<Simulator> children;  // Holds children of current node
     int position;                   // Holds position to simulate
 
-
     Simulator(String[] gameBoard, int score, String player, int emptySpaces, String type, int position) {
         this.gameBoard = gameBoard;
         this.value = score;
@@ -109,13 +153,23 @@ class Simulator {
     }
 
     /**
-     * TODO - Game logic.
-     * 
-     * Perform a move at the given position, update emptySpaces. 
-     * Finish by changing player, computing score, and checking winner.
+     * Copy constructor.
+     */
+    Simulator(Simulator copy, String type, int position) {
+        this(Arrays.copyOf(copy.gameBoard, copy.gameBoard.length), copy.value, copy.player, copy.emptySpaces, type, position);
+        this.children = new ArrayList<>();
+        this.winner = "";
+    }
+
+    /**
+     * Game logic.
      */
     void makeMove(int position) {
-        return;
+        gameBoard[position] = player;
+        emptySpaces--;
+        changePlayer();
+        computeScore();
+        winner();
     }
 
     /**
@@ -240,7 +294,6 @@ class Simulator {
         signedScore = skew > 0 ? unsignedScore : -unsignedScore;
         value += signedScore;
     }
-
 
     /**
      * Returns all positions where a player has not yet made a move.
