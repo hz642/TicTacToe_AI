@@ -1,6 +1,11 @@
 import java.util.Arrays;
 import java.util.ArrayList;
 
+/**
+ * @author Sabeel Mansuri
+ * @author Hannah Zhou
+ * @author Hemanth Battu
+ */
 class AI {
     Simulator root;
 
@@ -12,7 +17,6 @@ class AI {
      * Exposed method; builds tree, runs minimax, and returns optimal move.
      */
     int computeBestMove() {
-        System.out.println("Nice move, now it's my turn!");
         buildTree(root);
 
         int bestValue = minimax(root);

@@ -24,7 +24,7 @@ class TicTacToe {
     /**
      * Constructor
      */
-    public TicTacToe() {
+    TicTacToe() {
         gameBoard = new String[9];
         input = new Scanner(System.in);
         run = true;
@@ -59,7 +59,7 @@ class TicTacToe {
      * Determines if a win or draw has occured
      * 
      */
-    private void winner() {
+    void winner() {
         int[] horizontalStarts = {0, 3, 6};
         int[] verticalStarts = {0, 1, 2};
 
@@ -146,6 +146,20 @@ class TicTacToe {
     }
 
     /**
+     * Exposed method - Performs predetermined move
+     */
+    boolean moveGUI(int userSelection) {
+        if(isOutOfRange(userSelection + 1) || moveAlreadyMade(userSelection + 1)) {
+            return false;
+        }
+
+        gameBoard[userSelection] = player;
+        emptySpaces--;
+        computeScore();
+        return true;
+    }
+
+    /**
      * Determines if user selection is not in gameboard
      */
     private boolean isOutOfRange(int userSelection) {
@@ -167,6 +181,11 @@ class TicTacToe {
         emptySpaces--;
         computeScore();
         changePlayer();
+    }
+
+    int aiMoveGUI() {
+        ai = new AI(gameBoard, score, player, emptySpaces);
+        return ai.computeBestMove();
     }
 
     /**
@@ -295,7 +314,7 @@ class TicTacToe {
     /**
      * Changes active player
      */
-    private void changePlayer() {
+    void changePlayer() {
         if (player.equals("X")) {
             player = "O";
         } else {
@@ -335,7 +354,7 @@ class TicTacToe {
     /**
      * Initializes game; equivalent to reset
      */
-    private void init() {
+    void init() {
         for (int i = 0; i < gameBoard.length; i++) {
             gameBoard[i] = Integer.toString(i+1);
         }
@@ -348,7 +367,7 @@ class TicTacToe {
     /**
      * Ends game; option for reset
      */
-    private void endGame() {
+    void endGame() {
         String endMessage = "";
         if (winner.equals("draw")) {
             endMessage = "The game has ended in a draw.";
