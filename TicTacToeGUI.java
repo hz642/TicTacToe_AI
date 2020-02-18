@@ -12,8 +12,6 @@ class TicTacToeGUI {
 
     static Color X = new Color(253, 150, 134);
     static Color O = new Color(175, 211, 148);
-    static Color BACKGROUND = new Color(64, 54, 53);
-    static Color BORDER = new Color(183, 179, 170);
 
     static final ActionListener BUTTON_PRESSED = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -62,20 +60,17 @@ class TicTacToeGUI {
      */
     void runGame() {
         JFrame.setDefaultLookAndFeelDecorated(true);
-        frame = new JFrame("Tic Tac Toe");
+        frame = new JFrame("Tic-Tac-Toe");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(3, 3));
-        panel.setBorder(BorderFactory.createLineBorder(BACKGROUND, 3));
+        panel.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
 
         for (int i = 0; i < 9; i++) {
             gameBoard[i] = new JButton();
             gameBoard[i].setCursor(new Cursor(Cursor.HAND_CURSOR));
             gameBoard[i].setFocusPainted(false);
-            gameBoard[i].setOpaque(true);
-            gameBoard[i].setBorder(BorderFactory.createLineBorder(BORDER, 1));
-            gameBoard[i].setBackground(BACKGROUND);
             gameBoard[i].setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 45));
             gameBoard[i].addActionListener(BUTTON_PRESSED);
             panel.add(gameBoard[i]);
